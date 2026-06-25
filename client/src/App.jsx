@@ -20,7 +20,7 @@ function AppLayout() {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         <Routes>
           <Route path="/" element={<ProtectedRoute><Matches /></ProtectedRoute>} />
           <Route path="/match/:id" element={<ProtectedRoute><MatchDetail /></ProtectedRoute>} />

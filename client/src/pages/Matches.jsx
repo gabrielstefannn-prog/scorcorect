@@ -78,7 +78,7 @@ export default function Matches() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="w-full max-w-4xl mx-auto px-6 py-6">
       {/* Header */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold text-slate-100">🏆 Meciuri WC 2026</h1>
