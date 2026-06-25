@@ -116,7 +116,7 @@ export default function MatchDetail() {
   const cards = events.filter(e => e.type === 'Card');
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="w-full max-w-4xl px-4 py-6">
       {/* Back */}
       <button onClick={() => navigate('/')} className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-sm mb-6 transition-colors">
         ← Înapoi la meciuri
