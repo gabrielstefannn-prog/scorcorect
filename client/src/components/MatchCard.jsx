@@ -43,7 +43,7 @@ export default function MatchCard({ match, prediction }) {
             {/* Home team */}
             <div className="flex-1 flex items-center gap-2 justify-end">
               <span className="text-sm font-semibold text-slate-200 text-right leading-tight">{match.homeTeam}</span>
-              <FlagEmoji code={match.homeTeamCode} size="text-3xl" />
+              <FlagEmoji code={match.homeTeamCode} size="40" />
             </div>
 
             {/* Score / Time */}
@@ -67,7 +67,7 @@ export default function MatchCard({ match, prediction }) {
 
             {/* Away team */}
             <div className="flex-1 flex items-center gap-2">
-              <FlagEmoji code={match.awayTeamCode} size="text-3xl" />
+              <FlagEmoji code={match.awayTeamCode} size="40" />
               <span className="text-sm font-semibold text-slate-200 leading-tight">{match.awayTeam}</span>
             </div>
           </div>

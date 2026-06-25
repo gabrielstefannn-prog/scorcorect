@@ -136,7 +136,7 @@ export default function MatchDetail() {
         <div className="flex items-center gap-4 mt-4">
           {/* Home */}
           <div className="flex-1 text-center">
-            <FlagEmoji code={match.homeTeamCode} size="text-5xl" className="mb-2 block" />
+            <FlagEmoji code={match.homeTeamCode} size="64" className="mb-2 block" />
             <p className="font-bold text-slate-100 text-sm sm:text-base">{match.homeTeam}</p>
           </div>
 
@@ -170,7 +170,7 @@ export default function MatchDetail() {
 
           {/* Away */}
           <div className="flex-1 text-center">
-            <FlagEmoji code={match.awayTeamCode} size="text-5xl" className="mb-2 block" />
+            <FlagEmoji code={match.awayTeamCode} size="64" className="mb-2 block" />
             <p className="font-bold text-slate-100 text-sm sm:text-base">{match.awayTeam}</p>
           </div>
         </div>
@@ -271,7 +271,7 @@ export default function MatchDetail() {
                           : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-500'
                       }`}
                     >
-                      {opt.code && <FlagEmoji code={opt.code} size="text-2xl" className="block mb-1" />}
+                      {opt.code && <FlagEmoji code={opt.code} size="28" className="block mb-1" />}
                       {opt.value === 'DRAW' && <span className="text-2xl block mb-1">🤝</span>}
                       <span className="text-xs font-medium leading-tight">{opt.label}</span>
                     </button>
@@ -406,7 +406,7 @@ export default function MatchDetail() {
               {lineups.map(team => (
                 <div key={team.team.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-4">
-                    <FlagEmoji code={match.homeTeam === team.team.name ? match.homeTeamCode : match.awayTeamCode} size="text-xl" />
+                    <FlagEmoji code={match.homeTeam === team.team.name ? match.homeTeamCode : match.awayTeamCode} size="24" />
                     <h3 className="font-bold text-slate-200">{team.team.name}</h3>
                     <span className="text-xs text-slate-500 ml-auto">{team.formation}</span>
                   </div>
