@@ -1,22 +1,19 @@
 const axios = require('axios');
 
 const api = axios.create({
-  baseURL: `https://${process.env.FOOTBALL_API_HOST}`,
+  baseURL: 'https://api.football-data.org/v4',
   headers: {
-    'x-rapidapi-key': process.env.FOOTBALL_API_KEY,
-    'x-rapidapi-host': process.env.FOOTBALL_API_HOST,
-    'x-apisports-key': process.env.FOOTBALL_API_KEY,
+    'X-Auth-Token': process.env.FOOTBALL_API_KEY,
   },
   timeout: 10000,
 });
 
 const cache = new Map();
 const CACHE_TTL = {
-  fixtures: 3600000,    // 1 ora
-  live: 60000,          // 1 minut
+  fixtures: 3600000,
+  live: 60000,
   finished: Infinity,
   lineups: 3600000,
-  statistics: 3600000,
 };
 
 function getCache(key) {
@@ -30,19 +27,26 @@ function setCache(key, data, ttl) {
   cache.set(key, { data, timestamp: Date.now(), ttl });
 }
 
+function mapStatus(status) {
+  if (['IN_PLAY', 'PAUSED', 'HALFTIME'].includes(status)) return 'LIVE';
+  if (['FINISHED', 'AWARDED'].includes(status)) return 'FINISHED';
+  if (['POSTPONED', 'CANCELLED', 'SUSPENDED'].includes(status)) return 'CANCELLED';
+  return 'SCHEDULED';
+}
+
 exports.getFixtures = async () => {
   const key = 'fixtures';
   const cached = getCache(key);
   if (cached) return cached;
 
-  const { data } = await api.get('/fixtures', {
-    params: {
-      league: process.env.WORLD_CUP_LEAGUE_ID,
-      season: process.env.WORLD_CUP_SEASON,
-    },
+  const competition = process.env.FOOTBALL_COMPETITION || 'WC';
+  const season = process.env.WORLD_CUP_SEASON || '2026';
+
+  const { data } = await api.get(`/competitions/${competition}/matches`, {
+    params: { season },
   });
 
-  const fixtures = data.response || [];
+  const fixtures = data.matches || [];
   setCache(key, fixtures, CACHE_TTL.fixtures);
   return fixtures;
 };
@@ -52,15 +56,12 @@ exports.getLiveFixtures = async () => {
   const cached = getCache(key);
   if (cached) return cached;
 
-  const { data } = await api.get('/fixtures', {
-    params: {
-      league: process.env.WORLD_CUP_LEAGUE_ID,
-      season: process.env.WORLD_CUP_SEASON,
-      live: 'all',
-    },
+  const competition = process.env.FOOTBALL_COMPETITION || 'WC';
+  const { data } = await api.get(`/competitions/${competition}/matches`, {
+    params: { status: 'IN_PLAY,PAUSED,HALFTIME' },
   });
 
-  const fixtures = data.response || [];
+  const fixtures = data.matches || [];
   setCache(key, fixtures, CACHE_TTL.live);
   return fixtures;
 };
@@ -70,23 +71,25 @@ exports.getMatchDetails = async (apiMatchId) => {
   const cached = getCache(key);
   if (cached) return cached;
 
-  const [fixtureRes, lineupsRes, statsRes, eventsRes] = await Promise.allSettled([
-    api.get('/fixtures', { params: { id: apiMatchId } }),
-    api.get('/fixtures/lineups', { params: { fixture: apiMatchId } }),
-    api.get('/fixtures/statistics', { params: { fixture: apiMatchId } }),
-    api.get('/fixtures/events', { params: { fixture: apiMatchId } }),
-  ]);
+  const { data } = await api.get(`/matches/${apiMatchId}`);
+  const match = data;
+
+  const isFinished = ['FINISHED', 'AWARDED'].includes(match.status);
 
   const result = {
-    fixture: fixtureRes.status === 'fulfilled' ? fixtureRes.value.data.response[0] : null,
-    lineups: lineupsRes.status === 'fulfilled' ? lineupsRes.value.data.response : [],
-    statistics: statsRes.status === 'fulfilled' ? statsRes.value.data.response : [],
-    events: eventsRes.status === 'fulfilled' ? eventsRes.value.data.response : [],
+    fixture: match,
+    lineups: match.lineups || [],
+    statistics: [],
+    events: (match.goals || []).map(g => ({
+      type: 'Goal',
+      time: { elapsed: g.minute },
+      team: { name: g.team?.name },
+      player: { name: g.scorer?.name || 'Unknown' },
+    })),
   };
 
-  const status = result.fixture?.fixture?.status?.short;
-  const isFinished = ['FT', 'AET', 'PEN'].includes(status);
   setCache(key, result, isFinished ? CACHE_TTL.finished : CACHE_TTL.live);
-
   return result;
 };
+
+exports.mapStatus = mapStatus;

@@ -36,24 +36,27 @@ exports.syncMatches = async (req, res) => {
     let created = 0, updated = 0;
 
     for (const f of fixtures) {
+      const homeScore = f.score?.fullTime?.home ?? f.score?.halfTime?.home ?? null;
+      const awayScore = f.score?.fullTime?.away ?? f.score?.halfTime?.away ?? null;
+
       const data = {
-        apiMatchId: f.fixture.id,
-        homeTeam: f.teams.home.name,
-        awayTeam: f.teams.away.name,
-        homeTeamCode: f.teams.home.id.toString(),
-        awayTeamCode: f.teams.away.id.toString(),
-        matchDate: new Date(f.fixture.date),
-        group: f.league.round?.includes('Group') ? f.league.round : null,
-        round: f.league.round || 'Group Stage',
-        venue: f.fixture.venue?.name,
-        status: mapStatus(f.fixture.status.short),
-        homeScore: f.goals.home,
-        awayScore: f.goals.away,
+        apiMatchId: f.id,
+        homeTeam: f.homeTeam.name,
+        awayTeam: f.awayTeam.name,
+        homeTeamCode: f.homeTeam.tla || f.homeTeam.id.toString(),
+        awayTeamCode: f.awayTeam.tla || f.awayTeam.id.toString(),
+        matchDate: new Date(f.utcDate),
+        group: f.group || null,
+        round: f.stage || 'GROUP_STAGE',
+        venue: f.venue || null,
+        status: mapStatus(f.status),
+        homeScore: homeScore,
+        awayScore: awayScore,
       };
 
-      const existing = await prisma.match.findUnique({ where: { apiMatchId: f.fixture.id } });
+      const existing = await prisma.match.findUnique({ where: { apiMatchId: f.id } });
       if (existing) {
-        await prisma.match.update({ where: { apiMatchId: f.fixture.id }, data });
+        await prisma.match.update({ where: { apiMatchId: f.id }, data });
         updated++;
       } else {
         await prisma.match.create({ data });
