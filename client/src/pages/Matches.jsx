@@ -127,12 +127,11 @@ export default function Matches() {
       ) : (
         Object.entries(grouped).map(([group, groupMatches]) => (
           <div key={group} className="mb-8">
-            <div className="flex items-center gap-3 mb-3">
-              <h2 className="text-sm font-bold text-amber-400 uppercase tracking-wider">{group}</h2>
-              <div className="flex-1 h-px bg-slate-800" />
-              <span className="text-xs text-slate-600">{groupMatches.length} meciuri</span>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-xs font-bold text-amber-400 uppercase tracking-widest">{group}</h2>
+              <div className="flex-1 h-px bg-slate-800/80" />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               {groupMatches.map(m => (
                 <MatchCard key={m.id} match={m} prediction={predictions[m.id]} />
               ))}
