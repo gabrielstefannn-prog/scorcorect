@@ -126,12 +126,12 @@ export default function Matches() {
         </div>
       ) : (
         Object.entries(grouped).map(([group, groupMatches]) => (
-          <div key={group} className="mb-8">
+          <div key={group} className="mb-12">
             <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-xs font-bold text-amber-400 uppercase tracking-widest">{group}</h2>
-              <div className="flex-1 h-px bg-slate-800/80" />
+              <span className="text-xs font-bold text-amber-400/80 uppercase tracking-widest px-3 py-1 rounded-full border border-amber-400/20 bg-amber-400/5">{group.replace('_', ' ')}</span>
+              <div className="flex-1 h-px bg-slate-800/60" />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               {groupMatches.map(m => (
                 <MatchCard key={m.id} match={m} prediction={predictions[m.id]} />
               ))}
