@@ -48,16 +48,14 @@ export default function MatchCard({ match, prediction }) {
         {isLive && <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-green-500 via-emerald-400 to-green-500" />}
 
         <div className="relative p-5">
-          {/* Status */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-1.5">
-              <div className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-              <span className={`text-xs font-semibold ${status.color}`}>{status.label}</span>
+          {/* Status - doar LIVE */}
+          {isLive && (
+            <div className="flex items-center gap-1.5 mb-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs font-semibold text-green-400">LIVE</span>
             </div>
-            {isFinished && hasScore && (
-              <span className="text-xs text-slate-600">Terminat</span>
-            )}
-          </div>
+          )}
+          {!isLive && <div className="mb-4" />}
 
           {/* Teams + Score */}
           <div className="flex items-center gap-3">
@@ -72,8 +70,13 @@ export default function MatchCard({ match, prediction }) {
             {/* Score / VS */}
             <div className="flex flex-col items-center min-w-[72px]">
               {hasScore ? (
-                <div className={`text-3xl font-black tracking-tight ${isLive ? 'text-green-400' : 'text-white'}`}>
-                  {match.homeScore}<span className="text-slate-600 mx-1">-</span>{match.awayScore}
+                <div className="flex flex-col items-center">
+                  {isFinished && (
+                    <span className="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Final</span>
+                  )}
+                  <div className={`text-3xl font-black tracking-tight ${isLive ? 'text-green-400' : 'text-white'}`}>
+                    {match.homeScore}<span className="text-slate-600 mx-1">-</span>{match.awayScore}
+                  </div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-0.5">
