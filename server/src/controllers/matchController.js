@@ -36,22 +36,25 @@ exports.syncMatches = async (req, res) => {
     let created = 0, updated = 0;
 
     for (const f of fixtures) {
-      const homeScore = f.score?.fullTime?.home ?? f.score?.halfTime?.home ?? null;
-      const awayScore = f.score?.fullTime?.away ?? f.score?.halfTime?.away ?? null;
+      // Sărim meciurile fără echipe determinate (faze eliminatorii viitoare)
+      if (!f.homeTeam?.name || !f.awayTeam?.name) continue;
+
+      const homeScore = f.score?.fullTime?.home ?? null;
+      const awayScore = f.score?.fullTime?.away ?? null;
 
       const data = {
         apiMatchId: f.id,
         homeTeam: f.homeTeam.name,
         awayTeam: f.awayTeam.name,
-        homeTeamCode: f.homeTeam.tla || f.homeTeam.id.toString(),
-        awayTeamCode: f.awayTeam.tla || f.awayTeam.id.toString(),
+        homeTeamCode: f.homeTeam.tla || f.homeTeam.id?.toString() || 'UNK',
+        awayTeamCode: f.awayTeam.tla || f.awayTeam.id?.toString() || 'UNK',
         matchDate: new Date(f.utcDate),
         group: f.group || null,
         round: f.stage || 'GROUP_STAGE',
-        venue: f.venue || null,
+        venue: null,
         status: mapStatus(f.status),
-        homeScore: homeScore,
-        awayScore: awayScore,
+        homeScore,
+        awayScore,
       };
 
       const existing = await prisma.match.findUnique({ where: { apiMatchId: f.id } });

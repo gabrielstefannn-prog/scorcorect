@@ -8,7 +8,8 @@
       "PowerShell(git *)",
       "PowerShell(Invoke-RestMethod -Uri \"https://scorcorect-server.onrender.com/api/health\" -ErrorAction SilentlyContinue)",
       "PowerShell(ConvertTo-Json *)",
-      "PowerShell($headers = @{ 'x-apisports-key' = 'd9cf0be719ef8035fd316beaec7c43df' }; $res = Invoke-RestMethod -Uri \"https://v3.football.api-sports.io/fixtures?league=1&season=2026\" -Headers $headers; Write-Host \"Results: $\\($res.results\\)\"; $res.response | Select-Object -First 2 | ConvertTo-Json -Depth 4)"
+      "PowerShell($headers = @{ 'x-apisports-key' = 'd9cf0be719ef8035fd316beaec7c43df' }; $res = Invoke-RestMethod -Uri \"https://v3.football.api-sports.io/fixtures?league=1&season=2026\" -Headers $headers; Write-Host \"Results: $\\($res.results\\)\"; $res.response | Select-Object -First 2 | ConvertTo-Json -Depth 4)",
+      "PowerShell($headers = @{ 'X-Auth-Token' = 'ba775facf7f448488e5d2785daf14e45' }; $res = Invoke-RestMethod -Uri \"https://api.football-data.org/v4/competitions/WC/matches?season=2026\" -Headers $headers; Write-Host \"Results: $\\($res.resultSet.count\\)\"; $res.matches | Select-Object -First 1 | ConvertTo-Json -Depth 5)"
     ]
   }
 }
