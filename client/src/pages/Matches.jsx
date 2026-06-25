@@ -80,16 +80,14 @@ export default function Matches() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100">🏆 Meciuri WC 2026</h1>
-          <p className="text-slate-500 text-sm mt-1">{matches.length} meciuri • {Object.keys(predictions).length} pronosticuri</p>
-        </div>
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-slate-100">🏆 Meciuri WC 2026</h1>
+        <p className="text-slate-500 text-sm mt-1">{matches.length} meciuri • {Object.keys(predictions).length} pronosticuri</p>
         {user?.isAdmin && (
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-all disabled:opacity-50"
+            className="mt-3 px-4 py-2 text-sm font-medium rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-all disabled:opacity-50"
           >
             {syncing ? 'Sincronizez...' : '🔄 Sync API'}
           </button>
@@ -97,7 +95,7 @@ export default function Matches() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+      <div className="flex justify-center gap-2 mb-6 overflow-x-auto pb-1">
         {[
           { id: 'all', label: 'Toate' },
           { id: 'live', label: `● Live${liveCount > 0 ? ` (${liveCount})` : ''}` },
@@ -128,7 +126,8 @@ export default function Matches() {
         Object.entries(grouped).map(([group, groupMatches]) => (
           <div key={group} className="mb-12">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-bold text-amber-400/80 uppercase tracking-widest px-3 py-1 rounded-full border border-amber-400/20 bg-amber-400/5">{group.replace('_', ' ')}</span>
+              <div className="flex-1 h-px bg-slate-800/60" />
+              <span className="text-xs font-bold text-amber-400/80 uppercase tracking-widest px-3 py-1 rounded-full border border-amber-400/20 bg-amber-400/5">{group.replace(/_/g, ' ')}</span>
               <div className="flex-1 h-px bg-slate-800/60" />
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
