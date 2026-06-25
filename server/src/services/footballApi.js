@@ -5,6 +5,7 @@ const api = axios.create({
   headers: {
     'x-rapidapi-key': process.env.FOOTBALL_API_KEY,
     'x-rapidapi-host': process.env.FOOTBALL_API_HOST,
+    'x-apisports-key': process.env.FOOTBALL_API_KEY,
   },
   timeout: 10000,
 });
