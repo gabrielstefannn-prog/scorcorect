@@ -19,8 +19,8 @@ export default function FlagEmoji({ code, size = '32', className = '' }) {
 
   return (
     <img
-      src={`https://flagcdn.com/w${px}/${iso}.png`}
-      srcSet={`https://flagcdn.com/w${parseInt(px) * 2}/${iso}.png 2x`}
+      src={`https://flagcdn.com/w160/${iso}.png`}
+      srcSet={`https://flagcdn.com/w320/${iso}.png 2x`}
       alt={code}
       className={`inline-block rounded-sm ${className}`}
       style={{ width: `${px}px`, height: `${Math.round(parseInt(px) * 0.67)}px`, objectFit: 'cover' }}
