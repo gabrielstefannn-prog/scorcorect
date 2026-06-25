@@ -74,8 +74,8 @@ exports.syncMatches = async (req, res) => {
 };
 
 function mapStatus(apiStatus) {
-  if (['1H', '2H', 'HT', 'ET', 'P', 'LIVE'].includes(apiStatus)) return 'LIVE';
-  if (['FT', 'AET', 'PEN'].includes(apiStatus)) return 'FINISHED';
-  if (['PST', 'CANC', 'ABD'].includes(apiStatus)) return 'CANCELLED';
+  if (['IN_PLAY', 'PAUSED', 'HALFTIME'].includes(apiStatus)) return 'LIVE';
+  if (['FINISHED', 'AWARDED'].includes(apiStatus)) return 'FINISHED';
+  if (['POSTPONED', 'CANCELLED', 'SUSPENDED'].includes(apiStatus)) return 'CANCELLED';
   return 'SCHEDULED';
 }
