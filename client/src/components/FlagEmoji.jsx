@@ -1,17 +1,14 @@
-// Convertește codul de țară în emoji de steag
 const flagMap = {
-  'MX': '🇲🇽', 'MA': '🇲🇦', 'US': '🇺🇸', 'CA': '🇨🇦',
-  'AR': '🇦🇷', 'AL': '🇦🇱', 'UA': '🇺🇦', 'PE': '🇵🇪',
-  'ES': '🇪🇸', 'CO': '🇨🇴', 'RS': '🇷🇸', 'HU': '🇭🇺',
-  'FR': '🇫🇷', 'KE': '🇰🇪', 'PA': '🇵🇦', 'MR': '🇲🇷',
-  'DE': '🇩🇪', 'SA': '🇸🇦', 'JP': '🇯🇵', 'BE': '🇧🇪',
-  'PT': '🇵🇹', 'IQ': '🇮🇶', 'HR': '🇭🇷', 'CH': '🇨🇭',
-  'BR': '🇧🇷', 'EC': '🇪🇨', 'AU': '🇦🇺', 'CM': '🇨🇲',
-  'NL': '🇳🇱', 'SN': '🇸🇳', 'UY': '🇺🇾', 'AO': '🇦🇴',
-  'GB-ENG': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'TN': '🇹🇳', 'CD': '🇨🇩',
-  'ZA': '🇿🇦', 'IS': '🇮🇸', 'IR': '🇮🇷', 'CZ': '🇨🇿',
-  'IT': '🇮🇹', 'NO': '🇳🇴', 'CI': '🇨🇮',
-  'KR': '🇰🇷', 'GH': '🇬🇭', 'ZM': '🇿🇲',
+  // TLA codes (football-data.org)
+  'MEX': '🇲🇽', 'USA': '🇺🇸', 'CAN': '🇨🇦', 'PAN': '🇵🇦', 'HAI': '🇭🇹', 'CUW': '🇨🇼',
+  'ARG': '🇦🇷', 'BRA': '🇧🇷', 'COL': '🇨🇴', 'URU': '🇺🇾', 'ECU': '🇪🇨', 'PAR': '🇵🇾',
+  'ESP': '🇪🇸', 'FRA': '🇫🇷', 'GER': '🇩🇪', 'ENG': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'POR': '🇵🇹', 'BEL': '🇧🇪',
+  'NED': '🇳🇱', 'CRO': '🇭🇷', 'SUI': '🇨🇭', 'AUT': '🇦🇹', 'NOR': '🇳🇴', 'CZE': '🇨🇿',
+  'TUR': '🇹🇷', 'SCO': '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'SWE': '🇸🇪', 'BIH': '🇧🇦', 'ALG': '🇩🇿',
+  'JPN': '🇯🇵', 'KOR': '🇰🇷', 'KSA': '🇸🇦', 'IRN': '🇮🇷', 'AUS': '🇦🇺',
+  'IRQ': '🇮🇶', 'JOR': '🇯🇴', 'UZB': '🇺🇿', 'QAT': '🇶🇦', 'NZL': '🇳🇿',
+  'MAR': '🇲🇦', 'SEN': '🇸🇳', 'EGY': '🇪🇬', 'GHA': '🇬🇭', 'RSA': '🇿🇦',
+  'CIV': '🇨🇮', 'TUN': '🇹🇳', 'COD': '🇨🇩', 'CPV': '🇨🇻',
 };
 
 export default function FlagEmoji({ code, size = 'text-2xl', className = '' }) {
