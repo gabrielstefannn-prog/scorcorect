@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\server\"; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\server'; node src/index.js\" -WindowStyle Normal; Write-Host \"Server pornit\")",
+      "PowerShell(Start-Sleep -Seconds 2; Invoke-RestMethod -Uri \"http://localhost:3001/api/health\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\client'; npm run dev\" -WindowStyle Normal; Write-Host \"Client pornit\")",
+      "PowerShell(Start-Sleep -Seconds 4; Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -ErrorAction SilentlyContinue | Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(git *)"
+    ]
+  }
+}
