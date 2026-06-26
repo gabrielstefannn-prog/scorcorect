@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scaleY(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.popup-enter {
+  animation: slideDown 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top center;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,9 +24,32 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #0a0e1a;
   color: #e2e8f0;
   min-height: 100vh;
+  background-color: #060a14;
+  background-image:
+    /* Stadium lights top */
+    radial-gradient(ellipse 80% 40% at 20% -10%, rgba(245,158,11,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 40% at 80% -10%, rgba(239,68,68,0.06) 0%, transparent 60%),
+    /* Center glow */
+    radial-gradient(ellipse 60% 50% at 50% 30%, rgba(16,185,129,0.04) 0%, transparent 70%),
+    /* Bottom pitch green */
+    radial-gradient(ellipse 100% 40% at 50% 110%, rgba(5,46,22,0.6) 0%, transparent 60%),
+    /* Pitch lines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 80px,
+      rgba(255,255,255,0.012) 80px,
+      rgba(255,255,255,0.012) 81px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 120px,
+      rgba(255,255,255,0.008) 120px,
+      rgba(255,255,255,0.008) 121px
+    );
 }
 
 #root {
@@ -18,4 +57,17 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: relative;
+}
+
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('/bg.webp');
+  background-size: cover;
+  background-position: center;
+  filter: blur(1.5px);
+  transform: scale(1.05);
+  z-index: -1;
 }

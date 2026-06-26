@@ -25,50 +25,64 @@ export default function MatchCard({ match, prediction }) {
           ? 'border-green-500/50 shadow-lg shadow-green-500/10'
           : 'border-slate-700/50 hover:border-slate-600/70'}`}
         style={{
-          background: isScheduled
-            ? 'linear-gradient(135deg, #0d1f12 0%, #0f172a 40%, #0d1b2a 100%)'
-            : isLive
-            ? 'linear-gradient(135deg, #052e16 0%, #0f172a 50%, #0d1b2a 100%)'
-            : 'linear-gradient(135deg, #0f172a 0%, #111827 100%)',
+          background: 'rgba(8, 14, 28, 0.88)',
+          backdropFilter: 'blur(2px)',
+          WebkitBackdropFilter: 'blur(2px)',
         }}>
 
-        {/* Decorative pitch lines */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
-          backgroundImage: isScheduled || isLive
-            ? 'repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.3) 30px, rgba(255,255,255,0.3) 31px)'
-            : 'none',
-          backgroundSize: '100% 31px',
-        }} />
-
-        {/* Center circle decoration */}
-        {(isScheduled || isLive) && (
+        {/* Decorative pitch lines - doar LIVE */}
+        {isLive && (
+          <div className="absolute inset-0 opacity-5 pointer-events-none" style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.3) 30px, rgba(255,255,255,0.3) 31px)',
+            backgroundSize: '100% 31px',
+          }} />
+        )}
+        {isLive && (
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border border-white/5 pointer-events-none" />
         )}
 
         {isLive && <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-green-500 via-emerald-400 to-green-500" />}
 
-        <div className="relative p-9">
+        {/* Corner glow effect */}
+        {isFinished && (
+          <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{
+            background: `
+              radial-gradient(ellipse 90% 80% at 100% 0%, rgba(239,68,68,0.35) 0%, rgba(239,68,68,0.08) 50%, transparent 75%),
+              radial-gradient(ellipse 90% 80% at 0% 100%, rgba(239,68,68,0.35) 0%, rgba(239,68,68,0.08) 50%, transparent 75%)
+            `,
+          }} />
+        )}
+        {isScheduled && (
+          <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{
+            background: `
+              radial-gradient(ellipse 90% 80% at 100% 0%, rgba(74,222,128,0.30) 0%, rgba(74,222,128,0.07) 50%, transparent 75%),
+              radial-gradient(ellipse 90% 80% at 0% 100%, rgba(74,222,128,0.30) 0%, rgba(74,222,128,0.07) 50%, transparent 75%)
+            `,
+          }} />
+        )}
+
+        <div className="relative" style={{ padding: '10px 36px 16px' }}>
           {/* Status - doar LIVE */}
           {isLive && (
-            <div className="flex items-center gap-1.5 mb-4">
+            <div className="flex items-center gap-1.5 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               <span className="text-xs font-semibold text-green-400">LIVE</span>
             </div>
           )}
-          {!isLive && <div className="mb-4" />}
 
           {/* Teams + Score */}
           <div className="flex items-center gap-3">
             {/* Home */}
-            <div className="flex-1 flex flex-col items-center gap-2">
+            <div className="flex-1 flex flex-col items-center gap-2" style={{ paddingLeft: '12px', minWidth: 0 }}>
               <FlagEmoji code={match.homeTeamCode} size="48" />
-              <span className="text-base font-semibold text-slate-200 text-center leading-tight">
+              <span className="text-base font-semibold text-slate-200 text-center leading-tight"
+                style={{ maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {match.homeTeam}
               </span>
             </div>
 
             {/* Score / VS */}
-            <div className="flex flex-col items-center min-w-[72px]">
+            <div className="flex flex-col items-center min-w-[72px]" style={{ alignSelf: 'flex-start', paddingTop: '0px' }}>
               {hasScore ? (
                 <div className="flex flex-col items-center">
                   {isFinished && (
@@ -97,9 +111,10 @@ export default function MatchCard({ match, prediction }) {
             </div>
 
             {/* Away */}
-            <div className="flex-1 flex flex-col items-center gap-2">
+            <div className="flex-1 flex flex-col items-center gap-2" style={{ paddingRight: '12px', minWidth: 0 }}>
               <FlagEmoji code={match.awayTeamCode} size="48" />
-              <span className="text-base font-semibold text-slate-200 text-center leading-tight">
+              <span className="text-base font-semibold text-slate-200 text-center leading-tight"
+                style={{ maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {match.awayTeam}
               </span>
             </div>
@@ -107,10 +122,10 @@ export default function MatchCard({ match, prediction }) {
 
           {/* Prediction */}
           {prediction?.predictedWinner && (
-            <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-              <span className="text-xs text-slate-600">Pronosticul tău</span>
+            <div className="border-t border-white/5 flex flex-col items-center gap-0.5" style={{ marginTop: '14px', paddingTop: '14px' }}>
+              <span className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold">Pronosticul tău</span>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-400">
+                <span className="text-sm font-black text-slate-300">
                   {prediction.predictedHomeScore !== null
                     ? `${prediction.predictedHomeScore} - ${prediction.predictedAwayScore}`
                     : prediction.predictedWinner === 'HOME' ? match.homeTeam

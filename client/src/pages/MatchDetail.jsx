@@ -13,6 +13,12 @@ function canPredict(matchDate) {
   return new Date() < lock;
 }
 
+const glass = {
+  background: 'rgba(8, 14, 28, 0.88)',
+  backdropFilter: 'blur(2px)',
+  WebkitBackdropFilter: 'blur(2px)',
+};
+
 export default function MatchDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,7 +33,6 @@ export default function MatchDetail() {
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('predict');
 
-  // Form state
   const [predWinner, setPredWinner] = useState('');
   const [predHome, setPredHome] = useState('');
   const [predAway, setPredAway] = useState('');
@@ -69,7 +74,6 @@ export default function MatchDetail() {
     setError('');
     setSuccess('');
     setSaving(true);
-
     try {
       const payload = {
         matchId: parseInt(id),
@@ -77,13 +81,11 @@ export default function MatchDetail() {
         predictedHomeScore: useExactScore && predHome !== '' ? parseInt(predHome) : null,
         predictedAwayScore: useExactScore && predAway !== '' ? parseInt(predAway) : null,
       };
-
-      if (!payload.predictedWinner && !useExactScore) {
-        setError('Selectează o opțiune sau introdu un scor');
+      if (!payload.predictedWinner && payload.predictedHomeScore === null) {
+        setError('Selectează câștigătoarea sau introdu un scor exact');
         setSaving(false);
         return;
       }
-
       await predictionsApi.upsert(payload);
       setSuccess('Pronostic salvat!');
       fetchData();
@@ -107,136 +109,183 @@ export default function MatchDetail() {
   const locked = !canPredict(match.matchDate);
   const isFinished = match.status === 'FINISHED';
   const isLive = match.status === 'LIVE';
+  const isScheduled = match.status === 'SCHEDULED';
   const liveData = match.liveData;
   const events = liveData?.events || [];
   const lineups = liveData?.lineups || [];
   const statistics = liveData?.statistics || [];
-
   const goals = events.filter(e => e.type === 'Goal');
-  const cards = events.filter(e => e.type === 'Card');
 
   return (
     <div className="w-full max-w-4xl px-4 py-6">
       {/* Back */}
-      <button onClick={() => navigate('/')} className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-sm mb-6 transition-colors">
+      <button onClick={() => navigate('/')}
+        className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-sm mb-6 transition-colors">
         ← Înapoi la meciuri
       </button>
 
       {/* Match header */}
-      <div className={`rounded-2xl border p-6 mb-6 relative overflow-hidden
-        ${isLive ? 'border-green-500/40' : 'border-slate-800'} bg-slate-900`}>
+      <div className="rounded-2xl border overflow-hidden mb-6 relative"
+        style={{
+          ...glass,
+          border: isLive ? '1px solid rgba(74,222,128,0.4)' : '1px solid rgba(255,255,255,0.08)',
+          boxShadow: isLive ? '0 0 30px rgba(74,222,128,0.1)' : '0 4px 32px rgba(0,0,0,0.4)',
+        }}>
 
-        {isLive && <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-green-500 to-emerald-400 animate-pulse" />}
-
-        <div className="text-center mb-2">
-          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">{match.group || match.round}</span>
-          {match.venue && <p className="text-xs text-slate-600 mt-0.5">📍 {match.venue}</p>}
-        </div>
-
-        <div className="flex items-center gap-4 mt-4">
-          {/* Home */}
-          <div className="flex-1 text-center">
-            <FlagEmoji code={match.homeTeamCode} size="64" className="mb-2 block" />
-            <p className="font-bold text-slate-100 text-sm sm:text-base">{match.homeTeam}</p>
-          </div>
-
-          {/* Score/Time */}
-          <div className="text-center min-w-[100px]">
-            {(isLive || isFinished) && match.homeScore !== null ? (
-              <>
-                <div className={`text-4xl font-black ${isLive ? 'text-green-400' : 'text-slate-100'}`}>
-                  {match.homeScore} - {match.awayScore}
-                </div>
-                {isLive && (
-                  <div className="mt-1 text-xs font-bold text-green-400 flex items-center justify-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-                    LIVE
-                  </div>
-                )}
-                {isFinished && <div className="text-xs text-slate-500 mt-1">Final</div>}
-              </>
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-slate-400">vs</div>
-                <div className="text-sm font-bold text-amber-400 mt-1">
-                  {format(new Date(match.matchDate), 'HH:mm')}
-                </div>
-                <div className="text-xs text-slate-600 mt-0.5">
-                  {format(new Date(match.matchDate), 'EEE, d MMM', { locale: ro })}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Away */}
-          <div className="flex-1 text-center">
-            <FlagEmoji code={match.awayTeamCode} size="64" className="mb-2 block" />
-            <p className="font-bold text-slate-100 text-sm sm:text-base">{match.awayTeam}</p>
-          </div>
-        </div>
-
-        {/* Goal events */}
-        {goals.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-2 gap-x-4 text-xs">
-            <div className="space-y-1 text-right">
-              {goals.filter(g => g.team.name === match.homeTeam).map((g, i) => (
-                <div key={i} className="text-slate-300">⚽ {g.player.name} <span className="text-slate-500">{g.time.elapsed}'</span></div>
-              ))}
-            </div>
-            <div className="space-y-1">
-              {goals.filter(g => g.team.name === match.awayTeam).map((g, i) => (
-                <div key={i} className="text-slate-300">⚽ {g.player.name} <span className="text-slate-500">{g.time.elapsed}'</span></div>
-              ))}
-            </div>
-          </div>
+        {/* Corner glow */}
+        {isScheduled && (
+          <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{
+            background: `
+              radial-gradient(ellipse 90% 80% at 100% 0%, rgba(74,222,128,0.18) 0%, rgba(74,222,128,0.04) 50%, transparent 75%),
+              radial-gradient(ellipse 90% 80% at 0% 100%, rgba(74,222,128,0.18) 0%, rgba(74,222,128,0.04) 50%, transparent 75%)
+            `,
+          }} />
         )}
+        {isFinished && (
+          <div className="absolute inset-0 pointer-events-none rounded-2xl" style={{
+            background: `
+              radial-gradient(ellipse 90% 80% at 100% 0%, rgba(239,68,68,0.22) 0%, rgba(239,68,68,0.05) 50%, transparent 75%),
+              radial-gradient(ellipse 90% 80% at 0% 100%, rgba(239,68,68,0.22) 0%, rgba(239,68,68,0.05) 50%, transparent 75%)
+            `,
+          }} />
+        )}
+
+        {isLive && <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-green-500 via-emerald-400 to-green-500" />}
+
+        <div className="relative p-6">
+          {/* Group / round badge */}
+          <div className="flex justify-center mb-5">
+            <span style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: '16px',
+              letterSpacing: '0.15em',
+              color: '#000',
+              background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+              padding: '3px 18px',
+              borderRadius: '8px',
+            }}>
+              {(match.group || match.round || '').replace(/_/g, ' ')}
+            </span>
+          </div>
+
+          {/* Teams */}
+          <div className="flex items-center gap-4">
+            {/* Home */}
+            <div className="flex-1 flex flex-col items-center gap-3">
+              <FlagEmoji code={match.homeTeamCode} size="72" />
+              <p className="font-bold text-slate-100 text-sm sm:text-base text-center leading-tight">{match.homeTeam}</p>
+            </div>
+
+            {/* Score / Time */}
+            <div className="flex flex-col items-center min-w-[110px]">
+              {(isLive || isFinished) && match.homeScore !== null ? (
+                <>
+                  {isFinished && <span className="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Final</span>}
+                  <div className={`text-5xl font-black tracking-tight ${isLive ? 'text-green-400' : 'text-white'}`}
+                    style={{ textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>
+                    {match.homeScore}<span className="text-slate-600 mx-2">-</span>{match.awayScore}
+                  </div>
+                  {isLive && (
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-xs font-bold text-green-400 tracking-widest">LIVE</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="text-3xl font-black text-slate-500 mb-1">vs</div>
+                  <div className="text-2xl font-black text-amber-400" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>
+                    {format(new Date(match.matchDate), 'HH:mm')}
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1 font-medium">
+                    {format(new Date(match.matchDate), 'EEE, d MMM', { locale: ro })}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Away */}
+            <div className="flex-1 flex flex-col items-center gap-3">
+              <FlagEmoji code={match.awayTeamCode} size="72" />
+              <p className="font-bold text-slate-100 text-sm sm:text-base text-center leading-tight">{match.awayTeam}</p>
+            </div>
+          </div>
+
+          {/* Venue */}
+          {match.venue && (
+            <p className="text-center text-xs text-slate-600 mt-4">📍 {match.venue}</p>
+          )}
+
+          {/* Goals */}
+          {goals.length > 0 && (
+            <div className="mt-5 pt-4 border-t border-white/5 grid grid-cols-2 gap-x-4 text-xs">
+              <div className="space-y-1 text-right">
+                {goals.filter(g => g.team.name === match.homeTeam).map((g, i) => (
+                  <div key={i} className="text-slate-300">⚽ {g.player.name} <span className="text-slate-500">{g.time.elapsed}'</span></div>
+                ))}
+              </div>
+              <div className="space-y-1">
+                {goals.filter(g => g.team.name === match.awayTeam).map((g, i) => (
+                  <div key={i} className="text-slate-300">⚽ {g.player.name} <span className="text-slate-500">{g.time.elapsed}'</span></div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-800 mb-6 gap-1">
-        {[
-          { id: 'predict', label: '🎯 Pronostic' },
-          { id: 'friends', label: `👥 Prieteni (${allPredictions.length})` },
-          { id: 'lineup', label: '👕 Echipe' },
-          { id: 'stats', label: '📊 Statistici' },
-        ].map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-              activeTab === t.id
-                ? 'border-amber-500 text-amber-400'
-                : 'border-transparent text-slate-500 hover:text-slate-300'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex justify-center" style={{ marginTop: '28px', marginBottom: '28px' }}>
+        <div className="flex gap-1 p-1.5 rounded-2xl" style={{ background: 'rgba(8,14,28,0.6)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)' }}>
+          {[
+            { id: 'predict', label: '🎯 Pronostic' },
+            ...(isFinished ? [{ id: 'friends', label: `👥 Prieteni (${allPredictions.length})` }] : []),
+            { id: 'lineup', label: '👕 Echipe' },
+            { id: 'stats', label: '📊 Statistici' },
+          ].map(t => (
+            <button key={t.id} onClick={() => setActiveTab(t.id)}
+              className="transition-all"
+              style={{
+                padding: '9px 22px',
+                fontSize: '13px',
+                fontWeight: 800,
+                letterSpacing: '0.08em',
+                borderRadius: '12px',
+                background: activeTab === t.id ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : 'transparent',
+                color: activeTab === t.id ? '#000' : 'rgba(148,163,184,0.7)',
+                boxShadow: activeTab === t.id ? '0 4px 16px rgba(245,158,11,0.25)' : 'none',
+                whiteSpace: 'nowrap',
+              }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tab content */}
+      {/* Tab: Predict */}
       {activeTab === 'predict' && (
-        <div className="max-w-md mx-auto">
+        <div style={{ maxWidth: '420px', margin: '0 auto' }}>
           {locked ? (
-            <div className="text-center py-8">
+            <div className="rounded-2xl border p-6 text-center" style={{ ...glass, border: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="text-4xl mb-3">🔒</div>
-              <p className="text-slate-400 font-medium">Pronosticurile sunt închise</p>
-              <p className="text-slate-600 text-sm mt-1">Meciul {isLive ? 'este în desfășurare' : 'a început sau s-a terminat'}</p>
+              <p className="text-slate-300 font-bold">Pronosticurile sunt închise</p>
+              <p className="text-slate-500 text-sm mt-1">{isLive ? 'Meciul este în desfășurare' : 'Meciul a început sau s-a terminat'}</p>
               {myPrediction && (
-                <div className="mt-6 bg-slate-800/50 rounded-xl p-4 text-left">
-                  <p className="text-xs text-slate-500 uppercase font-bold mb-2">Pronosticul tău</p>
+                <div className="mt-5 pt-5 border-t border-white/5">
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-3">Pronosticul tău</p>
                   {myPrediction.predictedHomeScore !== null ? (
-                    <p className="text-2xl font-black text-slate-100 text-center">
+                    <p className="text-4xl font-black text-slate-100">
                       {myPrediction.predictedHomeScore} - {myPrediction.predictedAwayScore}
                     </p>
                   ) : (
-                    <p className="text-slate-300 text-center font-semibold">
+                    <p className="text-slate-200 font-semibold text-lg">
                       {myPrediction.predictedWinner === 'HOME' ? match.homeTeam :
                        myPrediction.predictedWinner === 'AWAY' ? match.awayTeam : 'Egal'}
                     </p>
                   )}
                   {isFinished && myPrediction.points !== null && (
-                    <div className={`mt-3 text-center text-lg font-black ${
+                    <div className={`mt-3 text-2xl font-black ${
                       myPrediction.points === 3 ? 'text-amber-400' :
                       myPrediction.points === 1 ? 'text-blue-400' : 'text-slate-500'
                     }`}>
@@ -247,129 +296,134 @@ export default function MatchDetail() {
               )}
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
-                  Câștigătoarea meciului (1 punct)
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Winner */}
+              <div className="rounded-2xl border" style={{ ...glass, border: '1px solid rgba(255,255,255,0.08)', padding: '28px 24px' }}>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest text-center" style={{ marginBottom: '32px' }}>
+                  Câștigătoarea meciului <span className="text-amber-500/70 ml-1">1 punct</span>
                 </p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   {[
                     { value: 'HOME', label: match.homeTeam, code: match.homeTeamCode },
                     { value: 'DRAW', label: 'Egal', code: null },
                     { value: 'AWAY', label: match.awayTeam, code: match.awayTeamCode },
                   ].map(opt => (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      onClick={() => {
-                        setPredWinner(opt.value);
-                        if (useExactScore) setUseExactScore(false);
-                      }}
-                      className={`py-3 px-2 rounded-xl border-2 transition-all text-center ${
-                        predWinner === opt.value && !useExactScore
-                          ? 'border-amber-500 bg-amber-500/20 text-amber-300'
-                          : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-500'
-                      }`}
-                    >
-                      {opt.code && <FlagEmoji code={opt.code} size="28" className="block mb-1" />}
-                      {opt.value === 'DRAW' && <span className="text-2xl block mb-1">🤝</span>}
-                      <span className="text-xs font-medium leading-tight">{opt.label}</span>
+                    <button type="button" key={opt.value}
+                      onClick={() => setPredWinner(predWinner === opt.value ? '' : opt.value)}
+                      className="transition-all"
+                      style={{
+                        padding: '20px 8px',
+                        borderRadius: '14px',
+                        border: predWinner === opt.value
+                          ? '2px solid rgba(245,158,11,0.8)'
+                          : '1px solid rgba(255,255,255,0.07)',
+                        background: predWinner === opt.value
+                          ? 'rgba(245,158,11,0.15)'
+                          : 'rgba(255,255,255,0.03)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: predWinner === opt.value
+                          ? '0 0 20px rgba(245,158,11,0.15)' : 'none',
+                      }}>
+                      {opt.code && <FlagEmoji code={opt.code} size="32" />}
+                      {opt.value === 'DRAW' && <span className="text-3xl">🤝</span>}
+                      <span className="text-xs font-semibold text-slate-300 text-center leading-tight">{opt.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="relative flex items-center gap-3">
-                <div className="flex-1 h-px bg-slate-800" />
-                <span className="text-xs text-slate-600 font-medium">SAU</span>
-                <div className="flex-1 h-px bg-slate-800" />
+              {/* Divider */}
+              <div className="flex items-center gap-3" style={{ margin: '12px 0' }}>
+                <div className="flex-1" style={{ height: '4px', background: 'rgba(255,255,255,0.6)', borderRadius: '2px', boxShadow: '0 0 8px rgba(0,0,0,0.8), 0 0 3px rgba(0,0,0,0.9)' }} />
+                <span className="text-sm font-black tracking-widest" style={{ color: '#ffffff', textShadow: '0 0 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.6)' }}>ȘI</span>
+                <div className="flex-1" style={{ height: '4px', background: 'rgba(255,255,255,0.6)', borderRadius: '2px', boxShadow: '0 0 8px rgba(0,0,0,0.8), 0 0 3px rgba(0,0,0,0.9)' }} />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Scor exact (3 puncte)
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => { setUseExactScore(!useExactScore); setPredWinner(''); }}
-                    className={`relative w-11 h-6 rounded-full transition-all ${useExactScore ? 'bg-amber-500' : 'bg-slate-700'}`}
-                  >
-                    <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${useExactScore ? 'translate-x-5' : ''}`} />
-                  </button>
-                </div>
-
-                {useExactScore && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 text-center">
-                      <p className="text-xs text-slate-500 mb-1">{match.homeTeam}</p>
-                      <input
-                        type="number" min="0" max="20"
-                        value={predHome}
-                        onChange={e => setPredHome(e.target.value)}
-                        className="w-full text-center text-2xl font-bold py-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-amber-500"
-                        placeholder="0"
-                      />
+              {/* Exact score */}
+              <div className="rounded-2xl border" style={{ ...glass, border: '1px solid rgba(255,255,255,0.08)', padding: '28px 24px' }}>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest text-center mb-5">
+                  Scor exact <span className="text-amber-500/70 ml-1">3 puncte</span>
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 text-center">
+                    <div className="flex flex-col items-center gap-1 mb-3">
+                      <FlagEmoji code={match.homeTeamCode} size="32" />
+                      <p className="text-xs text-slate-500 font-medium">{match.homeTeam}</p>
                     </div>
-                    <span className="text-2xl font-bold text-slate-500">-</span>
-                    <div className="flex-1 text-center">
-                      <p className="text-xs text-slate-500 mb-1">{match.awayTeam}</p>
-                      <input
-                        type="number" min="0" max="20"
-                        value={predAway}
-                        onChange={e => setPredAway(e.target.value)}
-                        className="w-full text-center text-2xl font-bold py-3 bg-slate-800 border-2 border-slate-700 rounded-xl text-slate-100 focus:outline-none focus:border-amber-500"
-                        placeholder="0"
-                      />
-                    </div>
+                    <input type="number" min="0" max="20"
+                      value={predHome}
+                      onChange={e => { setPredHome(e.target.value); setUseExactScore(true); }}
+                      className="w-full text-center text-3xl font-black py-3 rounded-xl text-slate-100 focus:outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(245,158,11,0.3)' }}
+                      placeholder="0" />
                   </div>
-                )}
+                  <span className="text-3xl font-black text-slate-600" style={{ marginTop: '36px' }}>-</span>
+                  <div className="flex-1 text-center">
+                    <div className="flex flex-col items-center gap-1 mb-3">
+                      <FlagEmoji code={match.awayTeamCode} size="32" />
+                      <p className="text-xs text-slate-500 font-medium">{match.awayTeam}</p>
+                    </div>
+                    <input type="number" min="0" max="20"
+                      value={predAway}
+                      onChange={e => { setPredAway(e.target.value); setUseExactScore(true); }}
+                      className="w-full text-center text-3xl font-black py-3 rounded-xl text-slate-100 focus:outline-none"
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(245,158,11,0.3)' }}
+                      placeholder="0" />
+                  </div>
+                </div>
               </div>
 
-              {error && <div className="bg-red-900/30 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">{error}</div>}
-              {success && <div className="bg-green-900/30 border border-green-500/30 rounded-lg px-4 py-3 text-green-400 text-sm">{success}</div>}
+              {error && <div className="rounded-xl px-4 py-3 text-red-400 text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
+              {success && (
+                <div className="flex items-center justify-center gap-2 font-black text-base" style={{ color: '#4ade80', textShadow: '0 0 8px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.6)' }}>
+                  <span style={{ fontSize: '20px' }}>✓</span> {success}
+                </div>
+              )}
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full py-3 rounded-xl font-bold text-black transition-all disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)' }}
-              >
+              <button type="submit" disabled={saving}
+                className="w-full rounded-xl font-black text-black tracking-wider transition-all disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)', padding: '16px', fontSize: '16px' }}>
                 {saving ? 'Se salvează...' : myPrediction ? '✏️ Actualizează pronosticul' : '🎯 Salvează pronosticul'}
               </button>
 
-              <p className="text-center text-xs text-slate-600">
-                Pronosticurile se închid cu 10 minute înainte de meci
+              <p className="text-center text-sm font-semibold" style={{ color: '#b91c1c' }}>
+                !! Pronosticurile se închid cu 10 minute înainte de meci !!
               </p>
             </form>
           )}
         </div>
       )}
 
+      {/* Tab: Friends */}
       {activeTab === 'friends' && (
         <div className="space-y-2">
           {allPredictions.length === 0 ? (
             <div className="text-center py-8 text-slate-500">Nimeni nu a pus pronostic încă</div>
           ) : (
             allPredictions.map(p => (
-              <div key={p.id} className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-xl px-4 py-3">
+              <div key={p.id} className="flex items-center justify-between rounded-xl px-4 py-3"
+                style={{ ...glass, border: '1px solid rgba(255,255,255,0.07)' }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm"
+                    style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.2)' }}>
                     {p.user.username[0].toUpperCase()}
                   </div>
-                  <span className={`font-medium text-sm ${p.userId === user.id ? 'text-amber-400' : 'text-slate-200'}`}>
-                    {p.user.username} {p.userId === user.id && '(tu)'}
+                  <span className={`font-semibold text-sm ${p.userId === user.id ? 'text-amber-400' : 'text-slate-200'}`}>
+                    {p.user.username} {p.userId === user.id && <span className="text-xs text-amber-500/60">(tu)</span>}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   {p.predictedWinner !== null ? (
                     <div className="text-right">
                       {p.predictedHomeScore !== null ? (
-                        <span className="font-mono font-bold text-slate-200">
+                        <span className="font-black text-slate-200 text-lg">
                           {p.predictedHomeScore} - {p.predictedAwayScore}
                         </span>
                       ) : (
-                        <span className="text-sm text-slate-400">
+                        <span className="text-sm text-slate-400 font-semibold">
                           {p.predictedWinner === 'HOME' ? match.homeTeam :
                            p.predictedWinner === 'AWAY' ? match.awayTeam : 'Egal'}
                         </span>
@@ -379,9 +433,10 @@ export default function MatchDetail() {
                     <span className="text-xs text-slate-600 italic">ascuns până la start</span>
                   )}
                   {isFinished && p.points !== null && (
-                    <span className={`text-sm font-black w-10 text-right ${
-                      p.points === 3 ? 'text-amber-400' :
-                      p.points === 1 ? 'text-blue-400' : 'text-slate-600'
+                    <span className={`text-sm font-black px-2 py-0.5 rounded-lg ${
+                      p.points === 3 ? 'text-amber-400 bg-amber-500/10' :
+                      p.points === 1 ? 'text-blue-400 bg-blue-500/10' :
+                      'text-slate-600 bg-slate-800/50'
                     }`}>
                       {p.points}pt
                     </span>
@@ -393,18 +448,20 @@ export default function MatchDetail() {
         </div>
       )}
 
+      {/* Tab: Lineup */}
       {activeTab === 'lineup' && (
         <div>
           {lineups.length === 0 ? (
-            <div className="text-center py-8 text-slate-500">
-              <div className="text-3xl mb-2">👕</div>
-              <p>Echipele de start nu sunt disponibile încă</p>
-              <p className="text-xs mt-1">Vor apărea cu ~1 oră înainte de meci</p>
+            <div className="text-center py-10 text-slate-500">
+              <div className="text-3xl mb-3">👕</div>
+              <p className="font-medium">Echipele de start nu sunt disponibile încă</p>
+              <p className="text-xs mt-1 text-slate-600">Vor apărea cu ~1 oră înainte de meci</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 gap-5">
               {lineups.map(team => (
-                <div key={team.team.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <div key={team.team.id} className="rounded-2xl border p-4"
+                  style={{ ...glass, border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div className="flex items-center gap-2 mb-4">
                     <FlagEmoji code={match.homeTeam === team.team.name ? match.homeTeamCode : match.awayTeamCode} size="24" />
                     <h3 className="font-bold text-slate-200">{team.team.name}</h3>
@@ -413,7 +470,7 @@ export default function MatchDetail() {
                   <div className="space-y-1.5">
                     {team.startXI?.map((p, i) => (
                       <div key={i} className="flex items-center gap-2 text-sm">
-                        <span className="w-6 text-center text-xs font-bold text-slate-500">{p.player.number}</span>
+                        <span className="w-6 text-center text-xs font-bold text-slate-600">{p.player.number}</span>
                         <span className={`${i === 0 ? 'font-bold text-amber-400' : 'text-slate-300'}`}>{p.player.name}</span>
                         <span className="ml-auto text-xs text-slate-600">{p.player.pos}</span>
                       </div>
@@ -426,12 +483,13 @@ export default function MatchDetail() {
         </div>
       )}
 
+      {/* Tab: Stats */}
       {activeTab === 'stats' && (
         <div>
           {statistics.length < 2 ? (
-            <div className="text-center py-8 text-slate-500">
-              <div className="text-3xl mb-2">📊</div>
-              <p>Statisticile nu sunt disponibile încă</p>
+            <div className="text-center py-10 text-slate-500">
+              <div className="text-3xl mb-3">📊</div>
+              <p className="font-medium">Statisticile nu sunt disponibile încă</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -441,18 +499,17 @@ export default function MatchDetail() {
                 const homeNum = parseInt(homeStat) || 0;
                 const awayNum = parseInt(awayStat) || 0;
                 const total = homeNum + awayNum;
-
                 return (
-                  <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                  <div key={i} className="rounded-xl border p-4"
+                    style={{ ...glass, border: '1px solid rgba(255,255,255,0.07)' }}>
                     <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="font-semibold text-slate-200">{homeStat}</span>
-                      <span className="text-xs text-slate-500 font-medium">{stat.type}</span>
-                      <span className="font-semibold text-slate-200">{awayStat}</span>
+                      <span className="font-black text-slate-200">{homeStat}</span>
+                      <span className="text-xs text-slate-500 font-semibold tracking-wider uppercase">{stat.type}</span>
+                      <span className="font-black text-slate-200">{awayStat}</span>
                     </div>
                     {total > 0 && (
-                      <div className="h-1.5 rounded-full bg-slate-800 flex overflow-hidden">
-                        <div className="bg-amber-500 rounded-l-full" style={{ width: `${(homeNum / total) * 100}%` }} />
-                        <div className="bg-blue-500 rounded-r-full" style={{ width: `${(awayNum / total) * 100}%` }} />
+                      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div className="h-full rounded-l-full" style={{ width: `${(homeNum / total) * 100}%`, background: 'linear-gradient(90deg, #f59e0b, #ef4444)' }} />
                       </div>
                     )}
                   </div>
