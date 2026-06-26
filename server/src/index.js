@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const matchRoutes = require('./routes/matches');
 const predictionRoutes = require('./routes/predictions');
 const leaderboardRoutes = require('./routes/leaderboard');
+const standingsRoutes = require('./routes/standings');
 const { updateLiveMatches, updateFinishedMatches } = require('./services/matchUpdater');
 
 const app = express();
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/standings', standingsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

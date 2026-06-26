@@ -11,7 +11,14 @@
       "PowerShell($headers = @{ 'x-apisports-key' = 'd9cf0be719ef8035fd316beaec7c43df' }; $res = Invoke-RestMethod -Uri \"https://v3.football.api-sports.io/fixtures?league=1&season=2026\" -Headers $headers; Write-Host \"Results: $\\($res.results\\)\"; $res.response | Select-Object -First 2 | ConvertTo-Json -Depth 4)",
       "PowerShell($headers = @{ 'X-Auth-Token' = 'ba775facf7f448488e5d2785daf14e45' }; $res = Invoke-RestMethod -Uri \"https://api.football-data.org/v4/competitions/WC/matches?season=2026\" -Headers $headers; Write-Host \"Results: $\\($res.resultSet.count\\)\"; $res.matches | Select-Object -First 1 | ConvertTo-Json -Depth 5)",
       "PowerShell($headers = @{ 'X-Auth-Token' = 'ba775facf7f448488e5d2785daf14e45' }; $res = Invoke-RestMethod -Uri \"https://api.football-data.org/v4/competitions/WC/matches?season=2026\" -Headers $headers; $res.matches | Where-Object { $_.homeTeam.name -ne $null } | ForEach-Object { \"$\\($_.homeTeam.tla\\) $\\($_.homeTeam.name\\)\"; \"$\\($_.awayTeam.tla\\) $\\($_.awayTeam.name\\)\" } | Sort-Object -Unique)",
-      "PowerShell($headers = @{ 'X-Auth-Token' = 'ba775facf7f448488e5d2785daf14e45' }; $res = Invoke-RestMethod -Uri \"https://api.football-data.org/v4/competitions/WC/matches?season=2026\" -Headers $headers; $res.matches | Where-Object { $_.homeTeam.name -ne $null } | Select-Object -First 3 | ForEach-Object { \"Home: $\\($_.homeTeam.name\\) TLA: '$\\($_.homeTeam.tla\\)' | Away: $\\($_.awayTeam.name\\) TLA: '$\\($_.awayTeam.tla\\)'\" })"
+      "PowerShell($headers = @{ 'X-Auth-Token' = 'ba775facf7f448488e5d2785daf14e45' }; $res = Invoke-RestMethod -Uri \"https://api.football-data.org/v4/competitions/WC/matches?season=2026\" -Headers $headers; $res.matches | Where-Object { $_.homeTeam.name -ne $null } | Select-Object -First 3 | ForEach-Object { \"Home: $\\($_.homeTeam.name\\) TLA: '$\\($_.homeTeam.tla\\)' | Away: $\\($_.awayTeam.name\\) TLA: '$\\($_.awayTeam.tla\\)'\" })",
+      "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\server'; npm run dev\")",
+      "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\client'; npm run dev\")",
+      "PowerShell(netstat *)",
+      "PowerShell(Stop-Process *)",
+      "PowerShell(Invoke-RestMethod -Uri \"http://localhost:3001/api/auth/login\" -Method POST -ContentType \"application/json\" -Body '{\"username\":\"admin\",\"password\":\"admin123\"}')",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\server'; npm run dev\"; Start-Sleep -Seconds 2; Start-Process powershell -ArgumentList \"-NoExit\", \"-Command\", \"cd 'C:\\\\Users\\\\PGL\\\\Documents\\\\projects\\\\scor_corect\\\\client'; npm run dev\")"
     ]
   }
 }

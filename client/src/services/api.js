@@ -42,4 +42,8 @@ export const leaderboardApi = {
   get: () => api.get('/leaderboard'),
 };
 
+export const standingsApi = {
+  get: () => api.get('/standings'),
+};
+
 export default api;

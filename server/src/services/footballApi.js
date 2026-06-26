@@ -92,4 +92,17 @@ exports.getMatchDetails = async (apiMatchId) => {
   return result;
 };
 
+exports.getStandings = async () => {
+  const key = 'standings';
+  const cached = getCache(key);
+  if (cached) return cached;
+
+  const competition = process.env.FOOTBALL_COMPETITION || 'WC';
+  const season = process.env.WORLD_CUP_SEASON || '2026';
+  const { data } = await api.get(`/competitions/${competition}/standings`, { params: { season } });
+  const standings = (data.standings || []).filter(s => s.type === 'TOTAL');
+  setCache(key, standings, 300000);
+  return standings;
+};
+
 exports.mapStatus = mapStatus;
