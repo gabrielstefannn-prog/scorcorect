@@ -5,6 +5,7 @@ import { ro } from 'date-fns/locale';
 import { matchesApi, predictionsApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import FlagEmoji from '../components/FlagEmoji';
+import LineupView from '../components/LineupView';
 
 const MINUTES_BEFORE_LOCK = 10;
 
@@ -38,6 +39,9 @@ export default function MatchDetail() {
   const [predAway, setPredAway] = useState('');
   const [useExactScore, setUseExactScore] = useState(false);
 
+  const [lineup, setLineup] = useState(null);
+  const [lineupLoading, setLineupLoading] = useState(false);
+
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 30000);
@@ -66,6 +70,19 @@ export default function MatchDetail() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadLineup = async () => {
+    if (lineup !== null) return;
+    setLineupLoading(true);
+    try {
+      const res = await matchesApi.getLineup(id);
+      setLineup(res.data);
+    } catch (e) {
+      setLineup({ available: false });
+    } finally {
+      setLineupLoading(false);
     }
   };
 
@@ -241,10 +258,10 @@ export default function MatchDetail() {
           {[
             { id: 'predict', label: '🎯 Pronostic' },
             ...(isFinished ? [{ id: 'friends', label: `👥 Prieteni (${allPredictions.length})` }] : []),
-            { id: 'lineup', label: '👕 Echipe' },
+            { id: 'lineup', label: '👕 Echipe', onClick: loadLineup },
             { id: 'stats', label: '📊 Statistici' },
           ].map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
+            <button key={t.id} onClick={() => { setActiveTab(t.id); t.onClick?.(); }}
               className="transition-all"
               style={{
                 padding: '9px 22px',
@@ -389,7 +406,7 @@ export default function MatchDetail() {
                 {saving ? 'Se salvează...' : myPrediction ? '✏️ Actualizează pronosticul' : '🎯 Salvează pronosticul'}
               </button>
 
-              <p className="text-center text-sm font-semibold" style={{ color: '#b91c1c' }}>
+              <p className="text-center text-xs font-semibold" style={{ color: '#b91c1c' }}>
                 !! Pronosticurile se închid cu 10 minute înainte de meci !!
               </p>
             </form>
@@ -450,35 +467,20 @@ export default function MatchDetail() {
 
       {/* Tab: Lineup */}
       {activeTab === 'lineup' && (
-        <div>
-          {lineups.length === 0 ? (
+        <div className="flex justify-center">
+          {lineupLoading ? (
+            <div className="text-center py-10 text-slate-500">
+              <div className="text-3xl mb-3 animate-bounce">⚽</div>
+              <p className="text-sm">Se încarcă formația...</p>
+            </div>
+          ) : !lineup || !lineup.available ? (
             <div className="text-center py-10 text-slate-500">
               <div className="text-3xl mb-3">👕</div>
-              <p className="font-medium">Echipele de start nu sunt disponibile încă</p>
-              <p className="text-xs mt-1 text-slate-600">Vor apărea cu ~1 oră înainte de meci</p>
+              <p className="font-medium text-slate-400">Formația nu este disponibilă încă</p>
+              <p className="text-xs mt-1 text-slate-600">Va apărea în ziua meciului</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-5">
-              {lineups.map(team => (
-                <div key={team.team.id} className="rounded-2xl border p-4"
-                  style={{ ...glass, border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <FlagEmoji code={match.homeTeam === team.team.name ? match.homeTeamCode : match.awayTeamCode} size="24" />
-                    <h3 className="font-bold text-slate-200">{team.team.name}</h3>
-                    <span className="text-xs text-slate-500 ml-auto">{team.formation}</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {team.startXI?.map((p, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm">
-                        <span className="w-6 text-center text-xs font-bold text-slate-600">{p.player.number}</span>
-                        <span className={`${i === 0 ? 'font-bold text-amber-400' : 'text-slate-300'}`}>{p.player.name}</span>
-                        <span className="ml-auto text-xs text-slate-600">{p.player.pos}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <LineupView home={lineup.home} away={lineup.away} />
           )}
         </div>
       )}

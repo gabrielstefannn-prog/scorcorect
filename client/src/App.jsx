@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Matches from './pages/Matches';
 import MatchDetail from './pages/MatchDetail';
 import Leaderboard from './pages/Leaderboard';
+import LineupSimulation from './pages/LineupSimulation';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -25,6 +26,7 @@ function AppLayout() {
           <Route path="/" element={<ProtectedRoute><Matches /></ProtectedRoute>} />
           <Route path="/match/:id" element={<ProtectedRoute><MatchDetail /></ProtectedRoute>} />
           <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+          <Route path="/lineup" element={<ProtectedRoute><LineupSimulation /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

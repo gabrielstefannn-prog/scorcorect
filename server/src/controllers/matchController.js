@@ -73,6 +73,45 @@ exports.syncMatches = async (req, res) => {
   }
 };
 
+exports.getLineup = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const match = await prisma.match.findUnique({ where: { id: parseInt(id) } });
+    if (!match) return res.status(404).json({ error: 'Meciul nu există' });
+    if (!match.apiMatchId) return res.json({ available: false });
+
+    const details = await footballApi.getMatchDetails(match.apiMatchId);
+    const fixture = details.fixture;
+
+    const homePlayers = fixture.homeTeam?.lineup || [];
+    const awayPlayers = fixture.awayTeam?.lineup || [];
+
+    if (homePlayers.length === 0 && awayPlayers.length === 0) {
+      return res.json({ available: false });
+    }
+
+    res.json({
+      available: true,
+      home: {
+        name: match.homeTeam,
+        code: match.homeTeamCode,
+        formation: fixture.homeTeam?.formation || null,
+        players: homePlayers,
+        bench: fixture.homeTeam?.bench || [],
+      },
+      away: {
+        name: match.awayTeam,
+        code: match.awayTeamCode,
+        formation: fixture.awayTeam?.formation || null,
+        players: awayPlayers,
+        bench: fixture.awayTeam?.bench || [],
+      },
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+};
+
 function mapStatus(apiStatus) {
   if (['IN_PLAY', 'PAUSED', 'HALFTIME'].includes(apiStatus)) return 'LIVE';
   if (['FINISHED', 'AWARDED'].includes(apiStatus)) return 'FINISHED';

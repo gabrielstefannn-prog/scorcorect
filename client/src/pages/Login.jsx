@@ -39,23 +39,23 @@ export default function Login() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-3">⚽</div>
+          <img src="/wc-ball.avif" alt="WC Ball" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', objectPosition: 'center', margin: '0 auto 12px' }} />
           <h1 className="text-3xl font-bold" style={{
             background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-          }}>ScorCorect</h1>
-          <p className="text-slate-500 text-sm mt-1">FIFA World Cup 2026</p>
+          }}>Football & Friends</h1>
+          <p className="text-slate-500 text-sm mt-1" style={{ marginBottom: '32px' }}>FIFA World Cup 2026</p>
         </div>
 
         {/* Card */}
-        <div className="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl shadow-2xl" style={{ padding: '36px 40px' }}>
           {/* Tabs */}
-          <div className="flex bg-slate-800/50 rounded-lg p-1 mb-6">
+          <div className="flex bg-slate-800/50 rounded-lg p-1" style={{ marginBottom: '32px' }}>
             {['login', 'register'].map(t => (
               <button
                 key={t}
                 onClick={() => { setTab(t); setError(''); }}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all ${
                   tab === t ? 'bg-amber-500 text-black shadow' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -64,14 +64,14 @@ export default function Login() {
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1.5">Username</label>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Nume</label>
               <input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder="username_tau"
+                placeholder="Nume jucator"
                 required
                 className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all"
               />
@@ -98,7 +98,7 @@ export default function Login() {
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-lg font-semibold text-black transition-all disabled:opacity-50"
-              style={{ background: loading ? '#78350f' : 'linear-gradient(135deg, #f59e0b, #ef4444)' }}
+              style={{ marginTop: '24px', background: loading ? '#78350f' : 'linear-gradient(135deg, #f59e0b, #ef4444)' }}
             >
               {loading ? 'Se încarcă...' : tab === 'login' ? 'Intră în cont' : 'Creează cont'}
             </button>

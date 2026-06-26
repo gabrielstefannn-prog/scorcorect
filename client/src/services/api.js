@@ -29,6 +29,7 @@ export const authApi = {
 export const matchesApi = {
   getAll: () => api.get('/matches'),
   getById: (id) => api.get(`/matches/${id}`),
+  getLineup: (id) => api.get(`/matches/${id}/lineup`),
   sync: () => api.post('/matches/sync'),
 };
 

@@ -1,8 +1,9 @@
 const router = require('express').Router();
 const auth = require('../middleware/auth');
-const { getMatches, getMatch, syncMatches } = require('../controllers/matchController');
+const { getMatches, getMatch, syncMatches, getLineup } = require('../controllers/matchController');
 
 router.get('/', auth, getMatches);
+router.get('/:id/lineup', auth, getLineup);
 router.get('/:id', auth, getMatch);
 router.post('/sync', auth, syncMatches);
 
