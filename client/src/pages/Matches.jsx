@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { matchesApi, predictionsApi, standingsApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import MatchCard from '../components/MatchCard';
@@ -137,39 +137,49 @@ export default function Matches() {
           </div>
         ) : (
           <>
-            {/* Group cards grid */}
-            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-              {standings.map(s => (
-                <GroupCard
-                  key={s.group}
-                  group={s.group}
-                  table={s.table}
-                  selected={selectedGroup === s.group}
-                  onSelect={() => setSelectedGroup(selectedGroup === s.group ? null : s.group)}
-                />
-              ))}
+            {/* Group cards grid cu popup inline */}
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {(() => {
+                const cols = 3;
+                const chunks = [];
+                for (let i = 0; i < standings.length; i += cols) {
+                  chunks.push(standings.slice(i, i + cols));
+                }
+                return chunks.map((chunk, ci) => (
+                  <React.Fragment key={ci}>
+                    {chunk.map(s => (
+                      <GroupCard
+                        key={s.group}
+                        group={s.group}
+                        table={s.table}
+                        selected={selectedGroup === s.group}
+                        onSelect={() => setSelectedGroup(selectedGroup === s.group ? null : s.group)}
+                      />
+                    ))}
+                    {chunk.some(s => s.group === selectedGroup) && (
+                      <div style={{ gridColumn: '1 / -1' }}
+                        className="rounded-2xl overflow-hidden border border-amber-400/20 bg-slate-900/60 p-8">
+                        <div className="flex items-center justify-between mb-4" style={{ paddingLeft: '20px', paddingRight: '20px' }}>
+                          <span className="text-xs font-black uppercase tracking-widest">
+                            <span className="px-2 py-0.5 rounded-md text-black" style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)' }}>
+                              {selectedGroup.replace('GROUP_', 'GROUP ')}
+                            </span>
+                            <span className="text-slate-400 ml-2">— Meciuri & Rezultate</span>
+                          </span>
+                          <button onClick={() => setSelectedGroup(null)}
+                            className="text-slate-600 hover:text-slate-300 text-sm px-2 py-0.5 rounded hover:bg-slate-800 transition-all">✕</button>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" style={{ zoom: 0.78 }}>
+                          {groupMatches.filter(m => m.group === selectedGroup).map(m => (
+                            <MatchCard key={m.id} match={m} prediction={predictions[m.id]} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ));
+              })()}
             </div>
-
-            {/* Expanded group matches */}
-            {selectedGroup && (
-              <div className="mt-8">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="flex-1 h-px bg-slate-800/60" />
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-amber-400 uppercase tracking-widest px-3 py-1 rounded-full border border-amber-400/30 bg-amber-400/5">
-                      {selectedGroup.replace('_', ' ')} — Meciuri & Rezultate
-                    </span>
-                    <button onClick={() => setSelectedGroup(null)} className="text-slate-600 hover:text-slate-400 text-xs px-2 py-1 rounded hover:bg-slate-800 transition-all">✕</button>
-                  </div>
-                  <div className="flex-1 h-px bg-slate-800/60" />
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 max-w-4xl mx-auto">
-                  {groupMatches.filter(m => m.group === selectedGroup).map(m => (
-                    <MatchCard key={m.id} match={m} prediction={predictions[m.id]} />
-                  ))}
-                </div>
-              </div>
-            )}
           </>
         )
       )}

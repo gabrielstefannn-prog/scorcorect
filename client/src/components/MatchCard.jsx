@@ -47,7 +47,7 @@ export default function MatchCard({ match, prediction }) {
 
         {isLive && <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-green-500 via-emerald-400 to-green-500" />}
 
-        <div className="relative p-5">
+        <div className="relative p-9">
           {/* Status - doar LIVE */}
           {isLive && (
             <div className="flex items-center gap-1.5 mb-4">
@@ -62,7 +62,7 @@ export default function MatchCard({ match, prediction }) {
             {/* Home */}
             <div className="flex-1 flex flex-col items-center gap-2">
               <FlagEmoji code={match.homeTeamCode} size="48" />
-              <span className="text-sm font-semibold text-slate-200 text-center leading-tight">
+              <span className="text-base font-semibold text-slate-200 text-center leading-tight">
                 {match.homeTeam}
               </span>
             </div>
@@ -74,9 +74,14 @@ export default function MatchCard({ match, prediction }) {
                   {isFinished && (
                     <span className="text-xs font-bold text-red-500 uppercase tracking-widest mb-1">Final</span>
                   )}
-                  <div className={`text-3xl font-black tracking-tight ${isLive ? 'text-green-400' : 'text-white'}`}>
+                  <div className={`text-4xl font-black tracking-tight ${isLive ? 'text-green-400' : 'text-white'}`}>
                     {match.homeScore}<span className="text-slate-600 mx-1">-</span>{match.awayScore}
                   </div>
+                  {isFinished && (
+                    <span className="text-sm text-slate-500 mt-1">
+                      {format(matchDate, 'd MMM · HH:mm', { locale: ro })}
+                    </span>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-0.5">
@@ -94,7 +99,7 @@ export default function MatchCard({ match, prediction }) {
             {/* Away */}
             <div className="flex-1 flex flex-col items-center gap-2">
               <FlagEmoji code={match.awayTeamCode} size="48" />
-              <span className="text-sm font-semibold text-slate-200 text-center leading-tight">
+              <span className="text-base font-semibold text-slate-200 text-center leading-tight">
                 {match.awayTeam}
               </span>
             </div>
